@@ -11,7 +11,7 @@ pub fn run() {
                 let excel = std::env::args().any(|arg| arg == "--excel")
                     || std::env::current_exe().ok()
                         .and_then(|p| p.file_stem().map(|s| s.to_string_lossy().to_lowercase()))
-                        .is_some_and(|name| name == "skuexcel");
+                        .is_some_and(|name| matches!(name.as_str(), "sku-excel" | "skuexcel"));
                 let result = if excel {
                     sessions::open_excel_home(handle.clone()).await
                 } else {

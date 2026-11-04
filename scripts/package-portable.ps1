@@ -6,9 +6,13 @@ if (!(Test-Path -LiteralPath $sourceExe)) {
     throw 'EXE not found. Run npm run desktop:build first.'
 }
 New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
+$oldExcelExe = Join-Path $outputDir 'SkuExcel.exe'
+if (Test-Path -LiteralPath $oldExcelExe) {
+    Remove-Item -LiteralPath $oldExcelExe -Force
+}
 $outputExe = Join-Path $outputDir 'RustOfficeModern.exe'
 Copy-Item -LiteralPath $sourceExe -Destination $outputExe -Force
-Copy-Item -LiteralPath $sourceExe -Destination (Join-Path $outputDir 'SkuExcel.exe') -Force
+Copy-Item -LiteralPath $sourceExe -Destination (Join-Path $outputDir 'Sku-Excel.exe') -Force
 Copy-Item -LiteralPath (Join-Path $projectRoot 'README.md') -Destination (Join-Path $outputDir 'README.md') -Force
 # Use .NET directly so packaging does not depend on Get-FileHash availability.
 $sha256 = [System.Security.Cryptography.SHA256]::Create()
@@ -20,7 +24,7 @@ try {
     $sha256.Dispose()
 }
 "$hash  RustOfficeModern.exe" | Set-Content -LiteralPath (Join-Path $outputDir 'SHA256SUMS.txt') -Encoding ascii
-"$hash  SkuExcel.exe" | Add-Content -LiteralPath (Join-Path $outputDir 'SHA256SUMS.txt') -Encoding ascii
+"$hash  Sku-Excel.exe" | Add-Content -LiteralPath (Join-Path $outputDir 'SHA256SUMS.txt') -Encoding ascii
 $signature = Get-AuthenticodeSignature -LiteralPath $outputExe
 $report = [ordered]@{
     file = 'RustOfficeModern.exe'

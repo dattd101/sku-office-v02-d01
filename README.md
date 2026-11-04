@@ -2,7 +2,7 @@
 
 ## Launch SKU Excel directly
 
-- Open `SkuExcel.exe` from the extracted portable package to launch Excel without opening Manager.
+- Open `Sku-Excel.exe` from the extracted portable package to launch Excel without opening Manager.
 - Excel opens a home screen listing only previous Excel workbooks and recovery snapshots. Choose a workbook to reopen it, select Blank workbook to create one, or use Open file to import an XLSX/XLS file. Startup never automatically opens or creates a workbook.
 - The Manager button opens Manager on demand. Closing Manager leaves other editor windows running.
 - `RustOfficeModern.exe` continues to open Manager. You can also launch it with `--excel`.
