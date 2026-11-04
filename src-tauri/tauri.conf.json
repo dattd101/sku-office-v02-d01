@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Rust Office",
+  "productName": "Sku Office",
   "version": "0.5.1",
   "identifier": "dev.rustoffice.modern",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Rust Office Manager",
+        "title": "Sku Office Manager",
         "width": 1440,
         "height": 900,
         "minWidth": 950,
@@ -27,7 +27,7 @@
   },
   "bundle": {
     "active": false,
-    "shortDescription": "Modern Rust Office desktop",
+    "shortDescription": "Modern Sku Office desktop",
     "icon": [
       "icons/icon.png",
       "icons/icon.ico"

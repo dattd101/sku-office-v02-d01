@@ -9,13 +9,20 @@ pub(crate) struct FileResult {
     pub(crate) document: OfficeDocument,
 }
 
-pub(crate) fn open_document() -> Result<Option<FileResult>, String> {
-    let Some(path) = rfd::FileDialog::new()
-        .add_filter("Office documents", &["docx", "xlsx", "xls", "pptx", "pdf", "json"])
-        .pick_file()
+pub(crate) fn open_document(pdf_only: bool) -> Result<Option<FileResult>, String> {
+    let dialog = rfd::FileDialog::new();
+    let dialog = if pdf_only {
+        dialog.add_filter("PDF documents", &["pdf"])
+    } else {
+        dialog.add_filter("Office documents", &["docx", "xlsx", "xls", "pptx", "pdf", "json"])
+    };
+    let Some(path) = dialog.pick_file()
     else {
         return Ok(None);
     };
+    if pdf_only && !path.extension().and_then(|e| e.to_str()).is_some_and(|e| e.eq_ignore_ascii_case("pdf")) {
+        return Err("Choose a .pdf file".into());
+    }
     let document = read_document(&path)?;
     Ok(Some(FileResult {
         path: path.display().to_string(),
@@ -91,7 +98,7 @@ pub(crate) fn save_document(
             };
             let Some(p) = rfd::FileDialog::new()
                 .add_filter(filter, &[ext])
-                .add_filter("Rust Office project", &["json"])
+                .add_filter("Sku Office project", &["json"])
                 .set_file_name(&format!("Untitled.{ext}"))
                 .save_file()
             else {

@@ -41,8 +41,8 @@ pub fn create_session(app: AppHandle, mode: String) -> Result<DocumentSession, S
     Ok(s)
 }
 #[tauri::command]
-pub fn import_session(app: AppHandle) -> Result<Option<DocumentSession>, String> {
-    let Some(FileResult {path, document}) = open_document()? else { return Ok(None) };
+pub fn import_session(app: AppHandle, pdf_only: Option<bool>) -> Result<Option<DocumentSession>, String> {
+    let Some(FileResult {path, document}) = open_document(pdf_only.unwrap_or(false))? else { return Ok(None) };
     let s = DocumentSession { id: Uuid::new_v4().to_string(), document, path: Some(path), dirty: false, updated_at: now() };
     persist(&app, &s)?;
     Ok(Some(s))
@@ -117,7 +117,7 @@ pub async fn open_editor_window(app: AppHandle, id: String) -> Result<(), String
         w.set_focus().map_err(|e|e.to_string())?;
         return Ok(());
     }
-    let title = match s.document.mode.as_str() { "word" => "Rust Word", "excel" => "Rust Excel", "pdf" => "Rust PDF Reader", _ => "Rust PowerPoint" };
+    let title = match s.document.mode.as_str() { "word" => "Sku Word", "excel" => "Sku Excel", "pdf" => "Sku PDF Reader", _ => "Sku PowerPoint" };
     WebviewWindowBuilder::new(&app, &label, WebviewUrl::App(format!("editor/?session={id}").into()))
         .title(title).inner_size(1440.0, 900.0).min_inner_size(950.0, 600.0)
         .build().map_err(|e|e.to_string())?;
