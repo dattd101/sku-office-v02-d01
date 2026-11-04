@@ -81,6 +81,7 @@ pub fn snapshot_session(app: AppHandle, id: String, document: OfficeDocument, pa
 pub fn save_session(app: AppHandle, id: String, document: OfficeDocument, path: Option<String>, save_as: bool) -> Result<Option<String>, String> {
     let mut s = get_session(app.clone(), id)?;
     if s.document.mode != document.mode { return Err("Editor type cannot change".into()); }
+    if s.document.mode == "pdf" { return Err("PDF reader is read-only".into()); }
     let target = if save_as { None } else { path.map(PathBuf::from) };
     let target = match target {
         Some(p) => p,
@@ -116,7 +117,7 @@ pub async fn open_editor_window(app: AppHandle, id: String) -> Result<(), String
         w.set_focus().map_err(|e|e.to_string())?;
         return Ok(());
     }
-    let title = match s.document.mode.as_str() { "word" => "Rust Word", "excel" => "Rust Excel", _ => "Rust PowerPoint" };
+    let title = match s.document.mode.as_str() { "word" => "Rust Word", "excel" => "Rust Excel", "pdf" => "Rust PDF Reader", _ => "Rust PowerPoint" };
     WebviewWindowBuilder::new(&app, &label, WebviewUrl::App(format!("editor/?session={id}").into()))
         .title(title).inner_size(1440.0, 900.0).min_inner_size(950.0, 600.0)
         .build().map_err(|e|e.to_string())?;

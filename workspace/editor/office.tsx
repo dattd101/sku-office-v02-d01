@@ -8,6 +8,7 @@ import {useActiveEditor} from './use-active-editor';
 import {fresh} from '@/workspace/document/create';
 import type {OfficeDocument} from '@/shared/document/types';
 import {RibbonButton} from '@/shared/editor/ribbon-button';
+import {PdfReader} from '@/features/pdf/reader';
 
 const ribbonTabs=['File','Home','Insert','Layout','Review','View'];
 export default function Office(){
@@ -80,6 +81,7 @@ export default function Office(){
   const title=path?.split(/[\\/]/).pop()??`Untitled.${feature.extension}`;
   if(loadError)return <main style={{padding:32,fontFamily:'sans-serif'}}><h1>Unable to open editor</h1><p>{loadError}</p><button onClick={()=>void invoke('focus_manager')}>Return to Manager</button></main>;
   if(!ready)return <main style={{padding:32,fontFamily:'sans-serif'}}><h1>Opening document…</h1><p>Loading local recovery session.</p></main>;
+  if(mode==='pdf')return <PdfReader sessionId={sessionId!} path={path}/>;
   return <div className={`app-shell mode-${mode} ${dark?'dark-app':''}`}>
     <header className="titlebar"><div className="brand"><span className="brand-mark"><Grid3X3 size={18}/></span><span>Rust<span className="brand-light">Office</span></span><span className="brand-pill">MODERN</span></div><div className="document-name">{title}{dirty?' •':''}</div><div className="title-actions"><span className="autosave"><Check size={14}/> Desktop workspace</span><button className="icon-button" title="Toggle dark mode" onClick={()=>setDark(!dark)}><Sparkles size={17}/></button></div></header>
     <div className="topbar"><div className="app-switcher"><button className="app-tab" onClick={()=>void invoke('focus_manager')}><Grid3X3 size={17}/> Manager</button><span className="app-tab active">{feature.name}</span></div><div className="quick-actions"><button onClick={newFile}><FilePlus2 size={16}/> New</button><button onClick={()=>void open()}><FolderOpen size={16}/> Open</button><button onClick={()=>void save()}><Save size={16}/> Save</button><button onClick={()=>void save(true)}><Download size={16}/> Save as</button><span className="vertical-rule"/><button className="square" title="Undo" disabled={!history.length} onClick={undo}><Undo2 size={17}/></button><button className="square" title="Redo" disabled={!future.length} onClick={redo}><Redo2 size={17}/></button></div></div>

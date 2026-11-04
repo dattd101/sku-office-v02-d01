@@ -9,5 +9,5 @@ export function useActiveEditor(props: EditorProps, newFile: () => void) {
   const word = useWordEditor(props, newFile);
   const excel = useExcelEditor(props);
   const powerpoint = usePowerPointEditor(props);
-  return {word, excel, powerpoint}[props.doc.mode];
+  return {word, excel, powerpoint}[props.doc.mode as "word" | "excel" | "powerpoint"] ?? word;
 }

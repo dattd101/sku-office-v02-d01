@@ -11,7 +11,7 @@ pub(crate) struct FileResult {
 
 pub(crate) fn open_document() -> Result<Option<FileResult>, String> {
     let Some(path) = rfd::FileDialog::new()
-        .add_filter("Office documents", &["docx", "xlsx", "xls", "pptx", "json"])
+        .add_filter("Office documents", &["docx", "xlsx", "xls", "pptx", "pdf", "json"])
         .pick_file()
     else {
         return Ok(None);
@@ -33,6 +33,7 @@ fn read_document(path: &Path) -> Result<OfficeDocument, String> {
         "docx" => word::adapter::read(path),
         "xlsx" | "xls" => excel::adapter::read(path),
         "pptx" => powerpoint::adapter::read(path),
+        "pdf" => crate::features::pdf::adapter::read(path),
         "json" => serde_json::from_slice(&std::fs::read(path).map_err(|e| e.to_string())?)
             .map_err(|e: serde_json::Error| e.to_string()),
         _ => return Err("Unsupported file extension".into()),
@@ -45,6 +46,7 @@ pub(crate) fn write_document(path: &Path, doc: &OfficeDocument) -> Result<(), St
         .and_then(|e| e.to_str())
         .unwrap_or("")
         .to_lowercase();
+    if doc.mode == "pdf" { return Err("PDF reader is read-only".into()); }
     match ext.as_str() {
         "docx" => word::adapter::write(path, doc),
         "xlsx" => excel::adapter::write(path, doc),
