@@ -51,22 +51,22 @@ export default function Office(){
     return()=>clearTimeout(timer);
   },[doc,path,dirty,ready,sessionId]);
   useEffect(()=>{
-    if(!sessionId)return;
+    if(!ready||!sessionId)return;
     let disposed=false;
     let unlisten:(()=>void)|undefined;
     getCurrentWindow().onCloseRequested(async event=>{
       if(!latest.current)return;
+      event.preventDefault();
       if(latest.current.dirty){
-        event.preventDefault();
         const choice=window.confirm('Unsaved edits are kept in Recovery. Close this editor?');
         if(!choice)return;
       }
       const {document,path,dirty}=latest.current;
       try{await invoke('snapshot_session',{id:sessionId,document,path,dirty})}catch(e){console.error(e)}
-      await getCurrentWindow().destroy();
-    }).then(fn=>{if(disposed)fn();else unlisten=fn});
+      try{await getCurrentWindow().destroy()}catch(e){setMessage(`Could not close window: ${String(e)}`)}
+    }).then(fn=>{if(disposed)fn();else unlisten=fn}).catch(e=>{if(!disposed)setMessage(`Could not register window close handler: ${String(e)}`)});
     return()=>{disposed=true;unlisten?.()};
-  },[sessionId]);
+  },[ready,sessionId]);
   const update=useCallback((updater:(d:OfficeDocument)=>OfficeDocument)=>{
     setDoc(prev=>{const next=updater(prev);if(next===prev)return prev;setHistory(h=>[...h.slice(-29),prev]);setFuture([]);return next});setDirty(true);
   },[]);

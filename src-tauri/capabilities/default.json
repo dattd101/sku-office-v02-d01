@@ -6,6 +6,7 @@
     "editor-*"
   ],
   "permissions": [
-    "core:default"
+    "core:default",
+    "core:window:allow-destroy"
   ]
 }
