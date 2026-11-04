@@ -61,6 +61,16 @@ pub(crate) fn write_document(path: &Path, doc: &OfficeDocument) -> Result<(), St
 }
 
 #[tauri::command]
+pub(crate) fn read_pdf_session(app: tauri::AppHandle, id: String) -> Result<Vec<u8>, String> {
+    let session = super::sessions::get_session(app, id)?;
+    if session.document.mode != "pdf" { return Err("Not a PDF session".into()); }
+    let path = session.path.ok_or("PDF session has no file path")?;
+    let path = Path::new(&path);
+    crate::features::pdf::adapter::read(path)?;
+    std::fs::read(path).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub(crate) fn save_document(
     document: OfficeDocument,
     path: Option<String>,

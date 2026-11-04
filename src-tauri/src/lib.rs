@@ -7,7 +7,7 @@ pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             workspace::files::save_document,
-            features::pdf::adapter::read_pdf_session,
+            workspace::files::read_pdf_session,
             sessions::create_session,
             sessions::import_session,
             sessions::get_session,
