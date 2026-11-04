@@ -41,8 +41,8 @@ pub fn create_session(app: AppHandle, mode: String) -> Result<DocumentSession, S
     Ok(s)
 }
 #[tauri::command]
-pub fn import_session(app: AppHandle, pdf_only: Option<bool>) -> Result<Option<DocumentSession>, String> {
-    let Some(FileResult {path, document}) = open_document(pdf_only.unwrap_or(false))? else { return Ok(None) };
+pub fn import_session(app: AppHandle, pdf_only: Option<bool>, excel_only: Option<bool>) -> Result<Option<DocumentSession>, String> {
+    let Some(FileResult {path, document}) = open_document(pdf_only.unwrap_or(false), excel_only.unwrap_or(false))? else { return Ok(None) };
     let s = DocumentSession { id: Uuid::new_v4().to_string(), document, path: Some(path), dirty: false, updated_at: now() };
     persist(&app, &s)?;
     Ok(Some(s))
@@ -133,4 +133,11 @@ pub async fn focus_manager(app: AppHandle) -> Result<(), String> {
     };
     w.show().map_err(|e|e.to_string())?;
     w.set_focus().map_err(|e|e.to_string())
+}
+
+pub async fn open_excel_home(app: AppHandle) -> Result<(), String> {
+    WebviewWindowBuilder::new(&app, "excel-home", WebviewUrl::App("excel/".into()))
+        .title("Sku Excel").inner_size(1440.0, 900.0)
+        .min_inner_size(950.0, 600.0).build().map_err(|e|e.to_string())?;
+    Ok(())
 }

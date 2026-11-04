@@ -3,6 +3,7 @@
   "description": "Default desktop permissions",
   "windows": [
     "main",
+    "excel-home",
     "editor-*"
   ],
   "permissions": [

@@ -13,15 +13,7 @@ pub fn run() {
                         .and_then(|p| p.file_stem().map(|s| s.to_string_lossy().to_lowercase()))
                         .is_some_and(|name| name == "skuexcel");
                 let result = if excel {
-                    async {
-                        let recent = sessions::list_sessions(handle.clone())?
-                            .into_iter().find(|s| s.document.mode == "excel");
-                        let session = match recent {
-                            Some(s) => s,
-                            None => sessions::create_session(handle.clone(), "excel".into())?,
-                        };
-                        sessions::open_editor_window(handle.clone(), session.id).await
-                    }.await
+                    sessions::open_excel_home(handle.clone()).await
                 } else {
                     sessions::focus_manager(handle.clone()).await
                 };

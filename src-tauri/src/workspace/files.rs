@@ -9,10 +9,12 @@ pub(crate) struct FileResult {
     pub(crate) document: OfficeDocument,
 }
 
-pub(crate) fn open_document(pdf_only: bool) -> Result<Option<FileResult>, String> {
+pub(crate) fn open_document(pdf_only: bool, excel_only: bool) -> Result<Option<FileResult>, String> {
     let dialog = rfd::FileDialog::new();
     let dialog = if pdf_only {
         dialog.add_filter("PDF documents", &["pdf"])
+    } else if excel_only {
+        dialog.add_filter("Excel workbooks", &["xlsx", "xls"])
     } else {
         dialog.add_filter("Office documents", &["docx", "xlsx", "xls", "pptx", "pdf", "json"])
     };
@@ -24,6 +26,9 @@ pub(crate) fn open_document(pdf_only: bool) -> Result<Option<FileResult>, String
         return Err("Choose a .pdf file".into());
     }
     let document = read_document(&path)?;
+    if excel_only && document.mode != "excel" {
+        return Err("Choose an Excel workbook".into());
+    }
     Ok(Some(FileResult {
         path: path.display().to_string(),
         document,
