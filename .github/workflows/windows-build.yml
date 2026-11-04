@@ -1,0 +1,94 @@
+name: Build Rust Office Windows x64 (portable)
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+      - name: Install frontend dependencies
+        run: npm install --no-audit --no-fund
+      - name: Test module boundary checker
+        run: npm run test:architecture
+      - name: Check module boundaries
+        run: npm run check:architecture
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Build static Next.js frontend
+        run: npm run build
+      - name: Validate Rust manifest
+        shell: pwsh
+        run: cargo metadata --manifest-path src-tauri/Cargo.toml --no-deps --format-version 1 > $null
+      - name: Check Rust backend
+        run: cargo check --manifest-path src-tauri/Cargo.toml
+      - name: Test Rust backend
+        run: cargo test --manifest-path src-tauri/Cargo.toml
+      - name: Build portable Windows EXE
+        run: npm run desktop:build
+      - name: Stage portable files and record SHA-256
+        shell: pwsh
+        run: ./scripts/package-portable.ps1
+      - name: Scan portable EXE with Microsoft Defender
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $exe = (Resolve-Path 'dist/RustOfficeModern.exe').Path
+          if (!(Get-Command Start-MpScan -ErrorAction SilentlyContinue)) {
+            throw 'Microsoft Defender scanning cmdlets unavailable; refusing to publish unscanned artifact.'
+          }
+          Update-MpSignature -ErrorAction Stop
+          Start-MpScan -ScanType CustomScan -ScanPath $exe -ErrorAction Stop
+          $threats = @(Get-MpThreatDetection -ErrorAction Stop | Where-Object { $_.Resources -match 'RustOfficeModern.exe' })
+          if ($threats.Count -gt 0) { $threats | Format-List | Out-String | Write-Host; throw 'Defender detected a threat associated with EXE.' }
+          if (!(Test-Path $exe)) { throw 'EXE was removed or quarantined after scan.' }
+          Write-Host 'Defender scan completed without a matching reported detection.'
+      - name: Upload portable directory (GitHub produces one ZIP)
+        id: portable
+        uses: actions/upload-artifact@v4
+        with:
+          name: RustOfficeModern-Windows-x64-portable
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Show EXE download and build details
+        shell: pwsh
+        env:
+          ARTIFACT_URL: ${{ steps.portable.outputs.artifact-url }}
+        run: |
+          $info = Get-Content dist/BUILD-INFO.json -Raw | ConvertFrom-Json
+          @"
+          ## Windows EXE ready
+
+          [Download portable ZIP containing RustOfficeModern.exe]($env:ARTIFACT_URL)
+
+          Extract the ZIP before opening RustOfficeModern.exe. GitHub sign-in is required to download Actions artifacts.
+
+          - Architecture: Windows x64
+          - Signature: $($info.signatureStatus)
+          - SHA-256: $($info.sha256)
+          - Microsoft Defender scan step completed without a matching reported detection.
+
+          Browser security warnings may still occur. This workflow does not provide a code-signing certificate.
+          "@ | Add-Content -Path $env:GITHUB_STEP_SUMMARY

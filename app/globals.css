@@ -1,0 +1,5 @@
+@import '../shared/styles/globals.css';
+@import '../features/word/styles.css';
+@import '../features/excel/styles.css';
+@import '../features/powerpoint/styles.css';
+@import '../features/manager/styles.css';
