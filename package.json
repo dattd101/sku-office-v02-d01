@@ -7,6 +7,7 @@
     "build": "next build",
     "tauri": "tauri",
     "desktop": "tauri dev",
+    "desktop:excel": "tauri dev -- --excel",
     "desktop:build": "tauri build --no-bundle",
     "desktop:package": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-portable.ps1",
     "typecheck": "tsc --noEmit",

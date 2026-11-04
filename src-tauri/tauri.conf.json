@@ -10,17 +10,7 @@
     "frontendDist": "../out"
   },
   "app": {
-    "windows": [
-      {
-        "title": "Sku Office Manager",
-        "width": 1440,
-        "height": 900,
-        "minWidth": 950,
-        "minHeight": 600,
-        "backgroundColor": "#f5f7fb",
-        "label": "main"
-      }
-    ],
+    "windows": [],
     "security": {
       "csp": "default-src 'self' asset: http://asset.localhost; img-src 'self' asset: http://asset.localhost data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src ipc: http://ipc.localhost; font-src 'self' data:; object-src 'none'; base-uri 'self'; frame-src blob:"
     }

@@ -124,8 +124,13 @@ pub async fn open_editor_window(app: AppHandle, id: String) -> Result<(), String
     Ok(())
 }
 #[tauri::command]
-pub fn focus_manager(app: AppHandle) -> Result<(), String> {
-    let w = app.get_webview_window("main").ok_or("Manager window not found")?;
+pub async fn focus_manager(app: AppHandle) -> Result<(), String> {
+    let w = match app.get_webview_window("main") {
+        Some(w) => w,
+        None => WebviewWindowBuilder::new(&app, "main", WebviewUrl::App("index.html".into()))
+            .title("Sku Office Manager").inner_size(1440.0, 900.0)
+            .min_inner_size(950.0, 600.0).build().map_err(|e|e.to_string())?,
+    };
     w.show().map_err(|e|e.to_string())?;
     w.set_focus().map_err(|e|e.to_string())
 }

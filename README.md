@@ -1,5 +1,15 @@
 # Rust Office v0.5.1 — Manager + independent editor windows
 
+## Launch SKU Excel directly
+
+- Open `SkuExcel.exe` from the extracted portable package to launch Excel without opening Manager.
+- Excel resumes the most recently updated Excel recovery snapshot, including unsaved changes. If none exists, it creates a new workbook. It does not re-read an external XLSX on startup; use Open to load that file again.
+- The Manager button opens Manager on demand. Closing Manager leaves other editor windows running.
+- `RustOfficeModern.exe` continues to open Manager. You can also launch it with `--excel`.
+- Development: `npm run desktop:excel`.
+- Both executable names use the same per-user recovery folder. Close a workbook before reopening it through another executable to avoid concurrent editing of the same recovery session.
+- Double-click association for `.xlsx` files is not included in this step.
+
 Windows desktop prototype using **Next.js 15**, **React 19**, **Tailwind CSS 3**, **Tauri 2**, and **Rust**. Word, Excel and PowerPoint open as separate windows from the Office Manager. Each editor is identified by a UUID session ID.
 
 ## What's implemented
